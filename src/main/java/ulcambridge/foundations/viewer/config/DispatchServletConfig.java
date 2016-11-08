@@ -35,7 +35,7 @@ import java.util.List;
     basePackages = {"ulcambridge.foundations.viewer"},
     useDefaultFilters = false,
     includeFilters = {@Filter(Controller.class)})
-@Import(BeanFactoryPostProcessorConfig.class)
+@Import(CrossContextConfig.class)
 public class DispatchServletConfig
     extends WebMvcConfigurerAdapter
     implements BeanFactoryAware {

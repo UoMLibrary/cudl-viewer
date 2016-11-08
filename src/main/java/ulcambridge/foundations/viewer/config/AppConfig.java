@@ -9,7 +9,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -19,7 +18,6 @@ import ulcambridge.foundations.viewer.ItemFactory;
 import ulcambridge.foundations.viewer.JSONReader;
 import ulcambridge.foundations.viewer.authentication.UsersDBDao;
 import ulcambridge.foundations.viewer.crowdsourcing.model.GsonFactory;
-import ulcambridge.foundations.viewer.utils.SecureRequestProxyHeaderFilter;
 
 import javax.sql.DataSource;
 
@@ -31,7 +29,7 @@ import javax.sql.DataSource;
     "ulcambridge.foundations.viewer.search",
     "ulcambridge.foundations.viewer.crowdsourcing"
 })
-@Import({BeanFactoryPostProcessorConfig.class, SecurityConfig.class})
+@Import({CrossContextConfig.class, SecurityConfig.class})
 @EnableScheduling
 @EnableTransactionManagement
 public class AppConfig {
