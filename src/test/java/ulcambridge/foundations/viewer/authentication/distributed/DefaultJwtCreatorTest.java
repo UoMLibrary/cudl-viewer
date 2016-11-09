@@ -139,6 +139,13 @@ public class DefaultJwtCreatorTest {
 
         assertThat(((Integer)claims.get("iat")).longValue(),
                    equalTo(clock.instant().getEpochSecond()));
+
+        assertThat(
+            ((Integer)claims.get("nbf")).longValue(),
+            equalTo(clock.instant()
+                .minus(DefaultJwtCreator.HISTORIC_VALIDITY_PERIOD)
+                .getEpochSecond()));
+
         assertThat(((Integer)claims.get("exp")).longValue(),
                    equalTo(clock.instant().plus(lifetime).getEpochSecond()));
         assertThat(claims.get("iss"), is(issuer.toString()));

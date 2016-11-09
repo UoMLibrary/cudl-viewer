@@ -18,7 +18,16 @@ public class DefaultJwtCreator implements JwtCreator {
     public static final Duration DEFAULT_VALIDITY_PERIOD =
         Duration.ofSeconds(30);
 
+    /**
+     * Tokens will be valid for this period (Not Before claim) before the
+     * current time. This is to specify a Not Before time without risking
+     * initial invalidity in case a consumer's clock is slightly behind ours.
+     */
+    public static final Duration HISTORIC_VALIDITY_PERIOD =
+        Duration.ofSeconds(5);
+
     private static final String CLAIM_ISSUED_AT = "iat";
+    private static final String CLAIM_NOT_BEFORE = "nbf";
     private static final String CLAIM_EXPIRATION = "exp";
     private static final String CLAIM_ISSUER = "iss";
     private static final String CLAIM_AUDIENCE = "aud";
@@ -93,6 +102,11 @@ public class DefaultJwtCreator implements JwtCreator {
         Instant now = this.clock.instant();
 
         claims.put(CLAIM_ISSUED_AT, now.getEpochSecond());
+        // It seems prudent to specify both a start and end validity time, so
+        // that we don't mint a token valid for a long period of time in case of
+        // our system clock being set in the far future by accident.
+        claims.put(CLAIM_NOT_BEFORE,
+            now.minus(HISTORIC_VALIDITY_PERIOD).getEpochSecond());
         claims.put(CLAIM_EXPIRATION, now.plus(this.lifetime).getEpochSecond());
         claims.put(CLAIM_ISSUER, issuerUrl.toString());
         claims.put(CLAIM_AUDIENCE, audienceUrl.toString());
