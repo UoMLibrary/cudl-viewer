@@ -107,7 +107,9 @@ public class UrlQueryParamAuthenticationEntryPoint
             UriComponentsBuilder.fromUri(this.getLoginFormUrl()), request)
             .queryParam(this.getParamName(),
                         this.getPostLoginPageUrl(request, response))
-            .build().toUriString();
+            .build()
+            .encode()
+            .toUriString();
     }
 
     @Override
