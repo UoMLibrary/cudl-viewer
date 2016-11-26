@@ -332,4 +332,14 @@ public class DispatchServletConfig
                 DefaultJwtCreator.DEFAULT_VALIDITY_PERIOD);
         }
     }
+
+    @Configuration
+    public static class TaggingApiConfig {
+
+        @Bean
+        public URI taggingApiBaseUrl(
+            @Value("${taggingApiBaseUrl}") URI taggingApiBaseUrl) {
+            return taggingApiBaseUrl;
+        }
+    }
 }

@@ -71,6 +71,7 @@
             <json:property name="rootURL" value="${rootURL}"/>
             <json:property name="jsonURL" value="${jsonURL}"/>
             <json:property name="jsonThumbURL" value="${jsonThumbnailsURL}"/>
+            <json:property name="taggingApiBaseURL" value="${taggingApiBaseURL}"/>
             <json:property name="pageNum" value="${page}"/>
             <json:property name="docId" value="${item.id}"/>
             <json:property name="docURL" value="${docURL}"/>

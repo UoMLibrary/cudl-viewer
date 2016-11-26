@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -52,20 +53,24 @@ public class DocumentViewController {
     private final CollectionsDao dataSource;
 
     private final URI rootURL;
+    private final URI taggingApiBaseURL;
 
     @Autowired
     public DocumentViewController(
         CollectionFactory collectionFactory, CollectionsDao collectionsDao,
-        ItemFactory itemFactory, @Value("${rootURL}") URI rootUrl) {
+        ItemFactory itemFactory, @Value("${rootURL}") URI rootUrl,
+        @Qualifier("taggingApiBaseUrl") URI taggingApiBaseURL) {
 
         Assert.notNull(collectionFactory);
         Assert.notNull(itemFactory);
         Assert.notNull(rootUrl);
+        Assert.notNull(taggingApiBaseURL);
 
         this.collectionFactory = collectionFactory;
         this.dataSource = collectionsDao;
         this.itemFactory = itemFactory;
         this.rootURL = rootUrl;
+        this.taggingApiBaseURL = taggingApiBaseURL;
     }
 
     // on path /view/{docId}
@@ -228,6 +233,7 @@ public class DocumentViewController {
         modelAndView.addObject("rootURL", rootURL);
         modelAndView.addObject("docURL", docURL);
         modelAndView.addObject("jsonURL", jsonURL);
+        modelAndView.addObject("taggingApiBaseURL", taggingApiBaseURL);
         modelAndView.addObject("jsonThumbnailsURL", jsonThumbnailsURL);
         modelAndView.addObject("requestURL", requestURL);
         modelAndView.addObject(

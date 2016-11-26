@@ -40,7 +40,8 @@ public class DocumentViewControllerTest {
 
         DocumentViewController c = new DocumentViewController(
             new CollectionFactory(collectionsdao), collectionsdao, itemFactory,
-            URI.create("http://testurl.testingisthebest.com:8080"));
+            URI.create("http://testurl.testingisthebest.com:8080"),
+            URI.create("http://tagging.example.com"));
 
         ModelAndView mDoc = c.handleRequest("MS-ADD-04004", req);
 
