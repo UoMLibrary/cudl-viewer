@@ -16,7 +16,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -24,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
@@ -57,14 +57,15 @@ import ulcambridge.foundations.viewer.authentication.DeferredEntryPointFilter.En
 import ulcambridge.foundations.viewer.authentication.EntryPointRequestFilters;
 import ulcambridge.foundations.viewer.authentication.FragmentAwareRequestCache;
 import ulcambridge.foundations.viewer.authentication.HeaderValueHttpServletRequestFragmentStorageStrategy;
+import ulcambridge.foundations.viewer.authentication.Http401CookieMetaRefreshRedirectStrategy;
 import ulcambridge.foundations.viewer.authentication.HttpServletRequestFragmentStorageStrategy;
 import ulcambridge.foundations.viewer.authentication.Obfuscation;
-import ulcambridge.foundations.viewer.authentication.Urls;
-import ulcambridge.foundations.viewer.authentication.Urls.UrlCodecStrategy;
 import ulcambridge.foundations.viewer.authentication.QueryStringRequestMatcher;
 import ulcambridge.foundations.viewer.authentication.RedirectingLogoutSuccessHandler;
 import ulcambridge.foundations.viewer.authentication.RequestFilterEntryPointWrapper;
 import ulcambridge.foundations.viewer.authentication.UrlQueryParamAuthenticationEntryPoint;
+import ulcambridge.foundations.viewer.authentication.Urls;
+import ulcambridge.foundations.viewer.authentication.Urls.UrlCodecStrategy;
 import ulcambridge.foundations.viewer.authentication.UsersDao;
 import ulcambridge.foundations.viewer.authentication.ViewerUserDetailsService;
 import ulcambridge.foundations.viewer.authentication.oauth2.CudlProviders;
@@ -263,8 +264,13 @@ public class WebSecurityConfig {
             .replacePath(LOGIN_PATH)
             .build().toUri();
 
+        RedirectStrategy redirectStrategy =
+            new Http401CookieMetaRefreshRedirectStrategy();
+
         return new UrlQueryParamAuthenticationEntryPoint(
-            loginPage, requestCache, urlCodec);
+            loginPage, requestCache,
+            UrlQueryParamAuthenticationEntryPoint.DEFAULT_PARAM_NAME,
+            redirectStrategy, urlCodec);
     }
 
     @Bean
