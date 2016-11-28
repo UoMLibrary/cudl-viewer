@@ -14,6 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -214,6 +215,7 @@ public class DispatchServletConfig
         }
 
         @Bean
+        @Lazy
         public byte[] distributedAuthJwtSigningSecret(
             @Value("${cudl.distributed-auth.jwt.signing.secret.value}")
                 String secret,
@@ -228,6 +230,7 @@ public class DispatchServletConfig
         }
 
         @Bean
+        @Lazy
         public PrivateKey distributedAuthJwtSigningKey(
             @Value("${cudl.distributed-auth.jwt.signing.key.path}")
                 String privateKeyResourcePath,
@@ -319,7 +322,7 @@ public class DispatchServletConfig
                 case RS384:
                 case RS512:
                     PrivateKey key = beanFactory.getBean(
-                        PrivateKey.class, "distributedAuthJwtSigningKey");
+                        "distributedAuthJwtSigningKey", PrivateKey.class);
                     signer = new JWTSigner(key);
                     break;
                 default:
