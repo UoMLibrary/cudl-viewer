@@ -1,6 +1,6 @@
 package ulcambridge.foundations.viewer.authentication.distributed;
 
-public class TokenException extends Exception {
+public class TokenException extends RuntimeException {
     public TokenException() {
     }
 

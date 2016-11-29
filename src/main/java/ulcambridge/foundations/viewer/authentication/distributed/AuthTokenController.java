@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.util.UriComponentsBuilder;
 import ulcambridge.foundations.viewer.utils.Utils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
+import java.time.Duration;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/auth")
@@ -51,11 +54,12 @@ public class AuthTokenController {
     @ResponseBody
     @PreAuthorize("isAuthenticated()")
     public String createJsonWebToken(
-        @RequestParam URI audience, HttpServletRequest request)
+        @RequestParam URI audience, @RequestParam Optional<Duration> lifetime,
+        HttpServletRequest request)
         throws TokenException {
 
         return this.jwtCreator.createJwt(
-            getIssuerUrl(request), audience, getUsername());
+            getIssuerUrl(request), audience, getUsername(), lifetime);
     }
 
     private String getUsername() {
@@ -80,8 +84,18 @@ public class AuthTokenController {
 
     @ResponseStatus(code = HttpStatus.FORBIDDEN)
     @ResponseBody
-    @ExceptionHandler(UnacceptableAudienceUrlTokenException.class)
-    public String badAudienceUrl(UnacceptableAudienceUrlTokenException e) {
+    @ExceptionHandler
+    public String badAudienceUrl(TokenException e) {
         return e.getMessage();
+    }
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    @ExceptionHandler
+    public String invalidRequestParam(MethodArgumentTypeMismatchException e) {
+        return String.format(
+            "Parameter \"%s\" was invalid: %s",
+            e.getParameter().getParameterName(),
+            e.getMostSpecificCause().getMessage());
     }
 }

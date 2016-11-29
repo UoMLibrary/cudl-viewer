@@ -46,6 +46,7 @@ import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Predicate;
@@ -332,7 +333,7 @@ public class DispatchServletConfig
 
             return new DefaultJwtCreator(
                 isAcceptableAudienceURL, signer, algo, Clock.systemUTC(),
-                DefaultJwtCreator.DEFAULT_VALIDITY_PERIOD);
+                DefaultJwtCreator.DEFAULT_VALIDITY_PERIOD, Duration.ofDays(2));
         }
     }
 

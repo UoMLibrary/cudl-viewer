@@ -34,6 +34,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -108,8 +109,9 @@ public class DefaultJwtCreatorTest {
     private DefaultJwtCreator getCreator(
         Predicate<URI> acceptableAudienceUrl, Clock clock) {
 
-        return new DefaultJwtCreator(acceptableAudienceUrl, signer,
-                                     algorithm, clock, lifetime);
+        return new DefaultJwtCreator(
+            acceptableAudienceUrl, signer, algorithm, clock,
+            lifetime, lifetime.plus(lifetime));
     }
 
     @Test(expected = UnacceptableAudienceUrlTokenException.class)
@@ -117,7 +119,7 @@ public class DefaultJwtCreatorTest {
         getCreator(url -> false, Clock.systemUTC()).createJwt(
             URI.create("https://example.com/"),
             URI.create("https://foo.example.com/"),
-            "bob");
+            "bob", Optional.empty());
     }
 
     @Test
@@ -131,7 +133,7 @@ public class DefaultJwtCreatorTest {
         URI audience = URI.create("https://foo.example.com/");
 
         String jwt = getCreator(url -> true, clock)
-            .createJwt(issuer, audience, "bob");
+            .createJwt(issuer, audience, "bob", Optional.empty());
 
         Map<String, Object> claims = verifier
             .createVerifier(issuer.toString(), audience.toString())

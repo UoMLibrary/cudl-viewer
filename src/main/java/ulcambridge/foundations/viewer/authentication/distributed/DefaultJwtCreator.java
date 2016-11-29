@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class DefaultJwtCreator implements JwtCreator {
@@ -36,34 +37,46 @@ public class DefaultJwtCreator implements JwtCreator {
     private final JWTSigner signer;
     private final Algorithm algorithm;
     private final Clock clock;
-    private final Duration lifetime;
+    private final Duration defaultLifetime;
+    private final Duration maximumLifetime;
     private final Predicate<URI> isAcceptableAudienceURI;
 
 
     public DefaultJwtCreator(Predicate<URI> isAcceptableAudienceURI,
                              JWTSigner signer, Algorithm algorithm, Clock clock,
-                             Duration lifetime) {
+                             Duration defaultLifetime,
+                             Duration maximumLifetime) {
 
         Assert.notNull(isAcceptableAudienceURI);
         Assert.notNull(signer);
         Assert.notNull(algorithm);
         Assert.notNull(clock);
-        Assert.notNull(lifetime);
+        Assert.notNull(defaultLifetime);
+        Assert.notNull(maximumLifetime);
 
         this.isAcceptableAudienceURI = isAcceptableAudienceURI;
         this.signer = signer;
         this.algorithm = algorithm;
         this.clock = clock;
-        this.lifetime = lifetime;
+        this.defaultLifetime = defaultLifetime;
+        this.maximumLifetime = maximumLifetime;
+
+        try {
+            this.rejectInvalidDuration(this.defaultLifetime);
+        }
+        catch(TokenException e) {
+            throw new IllegalArgumentException(
+                "defaultLifetime is greater than maximumLifetime", e);
+        }
     }
 
     public static DefaultJwtCreator create(
         Predicate<URI> isAcceptableAudienceURI,
-        PrivateKey signingKey, Clock clock, Duration lifetime) {
+        PrivateKey signingKey, Clock clock, Duration defaultLifetime) {
 
         return new DefaultJwtCreator(
             isAcceptableAudienceURI, new JWTSigner(signingKey),
-            Algorithm.RS256, clock, lifetime);
+            Algorithm.RS256, clock, defaultLifetime, Duration.ofDays(1));
     }
 
     public static DefaultJwtCreator create(
@@ -84,15 +97,8 @@ public class DefaultJwtCreator implements JwtCreator {
         return this.signer;
     }
 
-    /**
-     * Get the expiration time of the token in seconds from the UNIX epoch.
-     */
-    private Instant getExpirationTimestamp() {
-        return this.clock.instant().plus(this.lifetime);
-    }
-
     private Map<String, Object> getClaims(URI issuerUrl, URI audienceUrl,
-                                          String username) {
+                                          String username, Duration duration) {
         Map<String, Object> claims = new HashMap<>();
 
         Assert.isTrue(issuerUrl.isAbsolute());
@@ -107,7 +113,7 @@ public class DefaultJwtCreator implements JwtCreator {
         // our system clock being set in the far future by accident.
         claims.put(CLAIM_NOT_BEFORE,
             now.minus(HISTORIC_VALIDITY_PERIOD).getEpochSecond());
-        claims.put(CLAIM_EXPIRATION, now.plus(this.lifetime).getEpochSecond());
+        claims.put(CLAIM_EXPIRATION, now.plus(duration).getEpochSecond());
         claims.put(CLAIM_ISSUER, issuerUrl.toString());
         claims.put(CLAIM_AUDIENCE, audienceUrl.toString());
         claims.put(CLAIM_SUBJECT, username);
@@ -123,13 +129,31 @@ public class DefaultJwtCreator implements JwtCreator {
                 audienceUrl.toString());
     }
 
-    @Override
-    public String createJwt(URI issuerUrl, URI audienceUrl, String username)
+    private void rejectInvalidDuration(Duration duration)
         throws TokenException {
 
+        if(duration.compareTo(Duration.ZERO) < 0) {
+            throw new IllegalLifetimeTokenException(
+                "The requested JWT lifetime was negative");
+        }
+
+        if(duration.compareTo(this.maximumLifetime) > 0) {
+            throw new IllegalLifetimeTokenException(String.format(
+                "The requested JWT lifetime of %s is greater than the maximum" +
+                " permitted lifetime of %s.", duration, this.maximumLifetime));
+        }
+    }
+
+    @Override
+    public String createJwt(URI issuerUrl, URI audienceUrl, String username,
+                            Optional<Duration> lifetime) throws TokenException {
+
         rejectInvalidAudienceUrl(audienceUrl);
+        lifetime.ifPresent(this::rejectInvalidDuration);
 
         return getJWTSigner().sign(
-            getClaims(issuerUrl, audienceUrl, username), this.getOptions());
+            getClaims(issuerUrl, audienceUrl, username,
+                      lifetime.orElse(this.defaultLifetime)),
+            this.getOptions());
     }
 }
