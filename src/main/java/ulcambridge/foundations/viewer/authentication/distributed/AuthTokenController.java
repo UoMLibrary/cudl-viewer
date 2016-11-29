@@ -48,8 +48,8 @@ public class AuthTokenController {
      */
     @RequestMapping(path = "/token", method = RequestMethod.POST,
                     produces = APPLICATION_JWT_STR)
-    @ResponseBody()
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @ResponseBody
+    @PreAuthorize("isAuthenticated()")
     public String createJsonWebToken(
         @RequestParam URI audience, HttpServletRequest request)
         throws TokenException {
@@ -58,7 +58,6 @@ public class AuthTokenController {
             getIssuerUrl(request), audience, getUsername());
     }
 
-    @PreAuthorize("isAuthenticated()")
     private String getUsername() {
         Object principal = SecurityContextHolder.getContext()
             .getAuthentication().getPrincipal();
@@ -79,21 +78,10 @@ public class AuthTokenController {
             .build().toUri();
     }
 
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ResponseStatus(code = HttpStatus.FORBIDDEN)
     @ResponseBody
     @ExceptionHandler(UnacceptableAudienceUrlTokenException.class)
     public String badAudienceUrl(UnacceptableAudienceUrlTokenException e) {
-        return e.getMessage();
-    }
-
-    // Requests to obtain tokens are typically made by AJAX, so redirecting to a
-    // login page doesn't make sense. Explicitly handling the
-    // AccessDeniedException allows us to avoid invoking the Spring Security
-    // authentication machinery.
-    @ResponseStatus(code = HttpStatus.FORBIDDEN)
-    @ResponseBody
-    @ExceptionHandler(AccessDeniedException.class)
-    public String denied(AccessDeniedException e) {
         return e.getMessage();
     }
 }
