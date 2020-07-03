@@ -66,26 +66,6 @@ public class SecurityConfig {
         return details;
     }
 
-    @Bean(name = "linkedin")
-    public static OAuth2ProtectedResourceDetails oauth2Linkedin(
-        @Value("${linkedin.clientId}") String clientId,
-        @Value("${linkedin.clientSecret}") String clientSecret) {
-
-        AuthorizationCodeResourceDetails details =
-            new ExtendedBaseOAuth2ProtectedResourceDetails();
-
-        details.setClientId(clientId);
-        details.setClientSecret(clientSecret);
-        details.setAccessTokenUri(
-            "https://www.linkedin.com/uas/oauth2/accessToken");
-        details.setUserAuthorizationUri(
-            "https://www.linkedin.com/uas/oauth2/authorization");
-        details.setScope(Arrays.asList("r_basicprofile", "r_emailaddress"));
-        details.setClientAuthenticationScheme(AuthenticationScheme.form);
-
-        return details;
-    }
-
     @Bean(name = "googleOauth")
     public static OAuth2RestTemplate googleOauth2Rest(
         @Qualifier("google") OAuth2ProtectedResourceDetails details,
@@ -97,14 +77,6 @@ public class SecurityConfig {
     @Bean(name = "facebookOauth")
     public static OAuth2RestTemplate facebookOauth2Rest(
         @Qualifier("facebook") OAuth2ProtectedResourceDetails details,
-        OAuth2ClientContext context) {
-
-        return new OAuth2RestTemplate(details, context);
-    }
-
-    @Bean(name = "linkedinOauth")
-    public static OAuth2RestTemplate linkedinOauth2Rest(
-        @Qualifier("linkedin") OAuth2ProtectedResourceDetails details,
         OAuth2ClientContext context) {
 
         return new OAuth2RestTemplate(details, context);

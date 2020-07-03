@@ -59,18 +59,17 @@ import ulcambridge.foundations.viewer.authentication.FragmentAwareRequestCache;
 import ulcambridge.foundations.viewer.authentication.HeaderValueHttpServletRequestFragmentStorageStrategy;
 import ulcambridge.foundations.viewer.authentication.HttpServletRequestFragmentStorageStrategy;
 import ulcambridge.foundations.viewer.authentication.Obfuscation;
-import ulcambridge.foundations.viewer.authentication.Urls;
-import ulcambridge.foundations.viewer.authentication.Urls.UrlCodecStrategy;
 import ulcambridge.foundations.viewer.authentication.QueryStringRequestMatcher;
 import ulcambridge.foundations.viewer.authentication.RedirectingLogoutSuccessHandler;
 import ulcambridge.foundations.viewer.authentication.RequestFilterEntryPointWrapper;
 import ulcambridge.foundations.viewer.authentication.UrlQueryParamAuthenticationEntryPoint;
+import ulcambridge.foundations.viewer.authentication.Urls;
+import ulcambridge.foundations.viewer.authentication.Urls.UrlCodecStrategy;
 import ulcambridge.foundations.viewer.authentication.UsersDao;
 import ulcambridge.foundations.viewer.authentication.ViewerUserDetailsService;
 import ulcambridge.foundations.viewer.authentication.oauth2.CudlProviders;
 import ulcambridge.foundations.viewer.authentication.oauth2.FacebookProfile;
 import ulcambridge.foundations.viewer.authentication.oauth2.GoogleProfile;
-import ulcambridge.foundations.viewer.authentication.oauth2.LinkedinProfile;
 import ulcambridge.foundations.viewer.authentication.oauth2.Oauth2AuthenticationFilter;
 import ulcambridge.foundations.viewer.authentication.raven.AutoRegisteringRavenTokenCreatorWrapper;
 import ulcambridge.foundations.viewer.authentication.raven.CrsidObfuscatingRavenTokenCreator;
@@ -349,11 +348,10 @@ public class WebSecurityConfig {
     @Autowired
     public Iterable<EntryPointSelector> entryPointSelectors(
         @Qualifier("ravenEntryPointSelector") EntryPointSelector raven,
-        @Qualifier("linkedinEntryPointSelector") EntryPointSelector linkedin,
         @Qualifier("googleEntryPointSelector") EntryPointSelector google,
         @Qualifier("facebookEntryPointSelector") EntryPointSelector facebook) {
 
-        return Arrays.asList(raven, linkedin, google, facebook);
+        return Arrays.asList(raven, google, facebook);
     }
 
     @Bean(name = "deferredEntryPointFilter")
@@ -419,14 +417,11 @@ public class WebSecurityConfig {
 
     @Configuration
     public static class Oauth2AuthConfig {
-        public static final URI LINKEDIN_PROFILE_URL = URI.create(
-            "https://api.linkedin.com/v1/people/~:(id,email-address)?format=json");
         public static final URI GOOGLE_PROFILE_URL = URI.create(
             "https://www.googleapis.com/plus/v1/people/me/openIdConnect");
         public static final URI FACEBOOK_PROFILE_URL = URI.create(
                 "https://graph.facebook.com/me?fields=id,email");
 
-        public static final String TYPE_LINKEDIN = "linkedin";
         public static final String TYPE_GOOGLE = "google";
         public static final String TYPE_FACEBOOK = "facebook";
 
@@ -488,21 +483,6 @@ public class WebSecurityConfig {
                 successHandler);
         }
 
-        @Bean(name = "linkedinAuthFilter")
-        @Autowired
-        public Oauth2AuthenticationFilter<LinkedinProfile> linkedinOauth2Filter(
-            @Qualifier("linkedinOauth")
-            OAuth2RestTemplate restTemplate,
-            AuthenticationManager authenticationManager,
-            AuthenticationSuccessHandler successHandler) {
-
-            return setSuccessHandler(
-                new Oauth2AuthenticationFilter<>(
-                    authenticationManager, restTemplate, LINKEDIN_PROFILE_URL,
-                    LinkedinProfile.class, authFilterUrlMatcher(TYPE_LINKEDIN)),
-                successHandler);
-        }
-
         @Bean
         public Function<String, EntryPointSelector> entryPointSelector(
             @Qualifier("entryPointWrapper")
@@ -522,13 +502,6 @@ public class WebSecurityConfig {
                 return req -> matcher.matches(req) ? Optional.of(ep)
                                                    : Optional.empty();
             };
-        }
-
-        @Bean(name = "linkedinEntryPointSelector")
-        public EntryPointSelector linkedinEntryPointSelector(
-            Function<String, EntryPointSelector> entryPointSelector) {
-
-            return entryPointSelector.apply(TYPE_LINKEDIN);
         }
 
         @Bean(name = "googleEntryPointSelector")
@@ -652,11 +625,6 @@ public class WebSecurityConfig {
                     restrictFilterToAntPattern(LOGIN_PATH,
                                                deferredEntryPointFilter),
                     ExceptionTranslationFilter.class)
-
-                .addFilterAfter(
-                    getBeanFactory().getBean("linkedinAuthFilter",
-                                             Oauth2AuthenticationFilter.class),
-                    AbstractPreAuthenticatedProcessingFilter.class)
 
                 .addFilterAfter(
                     getBeanFactory().getBean("googleAuthFilter",

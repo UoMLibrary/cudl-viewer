@@ -20,7 +20,6 @@ import java.util.Optional;
 public class LoginController {
     private final OAuth2RestOperations googleTemplate;
     private final OAuth2RestOperations facebookTemplate;
-    private final OAuth2RestOperations linkedinTemplate;
     private final BookmarkDao bookmarkDao;
     private final UsersDao usersDao;
     private final UrlCodecStrategy urlCodecStrategy;
@@ -30,21 +29,18 @@ public class LoginController {
         BookmarkDao bookmarkDao, UsersDao usersDao,
         @Qualifier("googleOauth") OAuth2RestOperations googleTemplate,
         @Qualifier("facebookOauth") OAuth2RestOperations facebookTemplate,
-        @Qualifier("linkedinOauth") OAuth2RestOperations linkedinTemplate,
         UrlCodecStrategy urlCodec) {
 
         Assert.notNull(bookmarkDao);
         Assert.notNull(usersDao);
         Assert.notNull(googleTemplate);
         Assert.notNull(facebookTemplate);
-        Assert.notNull(linkedinTemplate);
         Assert.notNull(urlCodec);
 
         this.bookmarkDao = bookmarkDao;
         this.usersDao = usersDao;
         this.googleTemplate = googleTemplate;
         this.facebookTemplate = facebookTemplate;
-        this.linkedinTemplate = linkedinTemplate;
         this.urlCodecStrategy = urlCodec;
     }
 
