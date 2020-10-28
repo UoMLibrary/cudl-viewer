@@ -3,8 +3,13 @@ version: "3.7"
 services:
   cudl-viewer:
     image: tomcat:9.0.39-jdk11-openjdk-buster
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 1024M
     environment:
-      CATALINA_OPTS:
+      CATALINA_OPTS: -XX:MaxRAMPercentage=85.0
     volumes:
       # Create an exploded webapp up-to-date with the src JSP etc files, plus
       # classes. Classes will be reloaded if your IDE auto re-compiles, or you

@@ -3,6 +3,13 @@ version: "3"
 services:
   tomcat:
     image: tomcat:9.0.39-jdk11-openjdk-buster
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 1024M
+    environment:
+      CATALINA_OPTS: -XX:MaxRAMPercentage=85.0
     volumes:
       - ./target/FoundationsViewer.war:/usr/local/tomcat/webapps/ROOT.war
       - ./docker/tomcat-context.xml:/usr/local/tomcat/conf/Catalina/localhost/ROOT.xml
