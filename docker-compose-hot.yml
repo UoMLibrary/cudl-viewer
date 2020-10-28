@@ -25,10 +25,14 @@ services:
 
       - ${CUDL_DATA:-../cudl-data/}:/srv/cudl-viewer/cudl-data/
       - ${CUDL_VIEWER_CONTENT:-../cudl-viewer-content/}:/srv/cudl-viewer/cudl-viewer-content/
+
+      # Override Tomcat's default logging config
+      - ./docker/tomcat-logging.properties:/usr/local/tomcat/conf/logging.properties
     ports:
       - ${CUDL_VIEWER_HOST_PORT:-1111}:8080
     depends_on:
       - cudl-db
+
   cudl-db:
     build:
       context: .
@@ -42,7 +46,7 @@ services:
       - ${CUDL_DB_HOST_PORT:-0}:5432
 
   cudl-services:
-    image: camdl/cudl-services:6089
+    image: camdl/cudl-services:aa73
     init: true
     restart: always
     volumes:
@@ -55,7 +59,7 @@ services:
       - cudl-db
 
   cudl-xtf:
-    image: camdl/cudl-xtf:dce0
+    image: camdl/cudl-xtf:a525
     volumes:
       - ${CUDL_XTF_INDEX:-../xtf-index-cudl}:/srv/cudl/xtf/index-cudl
     ports:

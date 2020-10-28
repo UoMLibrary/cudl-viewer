@@ -16,6 +16,8 @@ services:
       - ${CUDL_VIEWER_CONFIG:-./docker/cudl-global.properties}:/etc/cudl-viewer/cudl-global.properties
       - ${CUDL_VIEWER_DATA:-../cudl-data/}:/srv/cudl-viewer/cudl-data/
       - ${CUDL_VIEWER_CONTENT:-../cudl-viewer-content/}:/srv/cudl-viewer/cudl-viewer-content/
+      # Override Tomcat's default logging config
+      - ./docker/tomcat-logging.properties:/usr/local/tomcat/conf/logging.properties
     ports:
       - "8888:8080"
     depends_on:
