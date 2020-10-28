@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   cudl-viewer:
-    image: tomcat:9.0.30-jdk11-openjdk
+    image: tomcat:9.0.39-jdk11-openjdk-buster
     environment:
       CATALINA_OPTS:
     volumes:
