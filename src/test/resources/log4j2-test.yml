@@ -5,6 +5,8 @@ configuration:
   appenders:
     Console:
       name: STDOUT
+      PatternLayout:
+        Pattern: "%d [%t] %-5level %logger{36} - %msg%n%throwable"
 
   loggers:
     root:
