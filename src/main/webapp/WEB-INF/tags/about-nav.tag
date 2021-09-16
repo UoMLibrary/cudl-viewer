@@ -16,6 +16,7 @@
                         <li><a href="/about-dl-platform">Community</a></li>
                         <li><a href="/contributors/">Contributors</a></li>
                         <li><a href="/terms/">Terms & Conditions</a></li>
+                        <li><a href="/privacy/">Privacy Policy</a></li>
                     </ul></li>
             </ul>
         </div>

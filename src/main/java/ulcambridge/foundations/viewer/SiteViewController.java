@@ -107,6 +107,15 @@ public class SiteViewController {
         return modelAndView;
     }
 
+    // on path /privacy/
+    @RequestMapping(value = "/privacy")
+    public ModelAndView handlePrivacyPolicyRequest() {
+
+        ModelAndView modelAndView = new ModelAndView("jsp/privacy-policy");
+        modelAndView.addObject("contentHTMLURL", contentHtmlUrl);
+        return modelAndView;
+    }
+
     // on path /mirador/
     @RequestMapping(value = "/mirador/{id}/{pagenum}")
     public ModelAndView handleMiradorRequest(@PathVariable("id") String id,
